@@ -1,3 +1,8 @@
+function readTime () {
+    date = "" + DS3231.date() + "/" + DS3231.month() + "/" + DS3231.year()
+    time = "" + DS3231.hour() + ":" + DS3231.minute()
+    dateTime = "" + date + " " + time + ","
+}
 // Round to 3 dec places, and multiply by gain for attenuated inputs
 function makeReading () {
     for (let index = 0; index <= Nloops; index++) {
@@ -40,35 +45,70 @@ input.onButtonPressed(Button.A, function () {
     basic.pause(100)
     radio.sendString("" + (ADC3))
 })
-// My TEMPORARY upload - no dateTime yet!
-input.onButtonPressed(Button.B, function () {
+function setDate (text: string) {
+    params = text.substr(2, text.length - 2)
+    DS3231.dateTime(
+    parseFloat(params.substr(4, 4)),
+    parseFloat(params.substr(2, 2)),
+    parseFloat(params.substr(0, 2)),
+    DS3231.day(),
+    DS3231.hour(),
+    DS3231.minute(),
+    DS3231.second()
+    )
+}
+function upload () {
     if (count > 0) {
-        for (let index = 0; index <= count - 1; index++) {
-            radio.sendString("" + (Vreadings0[index]))
+        for (let index5 = 0; index5 <= count - 1; index5++) {
+            radio.sendString("" + (dateTimeReadings[index5]))
             basic.pause(100)
-            radio.sendString("" + (Vreadings1[index]))
+            radio.sendString("" + (Vreadings0[index5]))
             basic.pause(100)
-            radio.sendString("" + (Vreadings2[index]))
+            radio.sendString("" + (Vreadings1[index5]))
             basic.pause(100)
-            radio.sendString("" + (Vreadings3[index]))
+            radio.sendString("" + (Vreadings2[index5]))
+            basic.pause(100)
+            radio.sendString("" + (Vreadings3[index5]))
             basic.pause(100)
         }
     }
+}
+function setTime (text: string) {
+    params = text.substr(2, text.length - 2)
+    DS3231.dateTime(
+    DS3231.year(),
+    DS3231.month(),
+    DS3231.date(),
+    DS3231.day(),
+    parseFloat(params.substr(0, 2)),
+    parseFloat(params.substr(2, 2)),
+    0
+    )
+}
+// My TEMPORARY upload - no dateTime yet!
+input.onButtonPressed(Button.B, function () {
+    upload()
 })
+let params = ""
 let b = 0
 let a = 0
 let Vreadings3: number[] = []
 let Vreadings2: string[] = []
 let Vreadings1: string[] = []
 let Vreadings0: string[] = []
-let dateTimeReadings: number[] = []
+let dateTimeReadings: string[] = []
 let ADC3 = 0
 let ADC2 = ""
 let ADC1 = ""
 let ADC0 = ""
+let dateTime = ""
+let time = ""
+let date = ""
 let gain = 0
 let count = 0
 let Nloops = 0
+let stringIn = ""
+let command = ""
 let oneMinute = 60000
 Nloops = 50
 count = 0
@@ -80,12 +120,16 @@ resetReadings()
 makeReading()
 // TODO - add multi-minute loop
 loops.everyInterval(oneMinute, function () {
-    makeReading()
-    Vreadings0.push(ADC0)
-    Vreadings1.push(ADC1)
-    Vreadings2.push(ADC2)
-    Vreadings3.push(ADC3)
-    count += 1
+    if (DS3231.minute() % 5 == 0) {
+        readTime()
+        dateTimeReadings.push(dateTime)
+        makeReading()
+        Vreadings0.push(ADC0)
+        Vreadings1.push(ADC1)
+        Vreadings2.push(ADC2)
+        Vreadings3.push(ADC3)
+        count += 1
+    }
     led.plot(4, 0)
     basic.pause(50)
     led.unplot(4, 0)
