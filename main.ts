@@ -1,6 +1,6 @@
 function readTime () {
-    date = "" + DS3231.date() + "/" + DS3231.month() + "/" + DS3231.year()
-    time = "" + DS3231.hour() + ":" + DS3231.minute()
+    date = "" + leadingZero(DS3231.date()) + "/" + leadingZero(DS3231.month()) + "/" + DS3231.year()
+    time = "" + leadingZero(DS3231.hour()) + ":" + leadingZero(DS3231.minute())
     dateTime = "" + date + " " + time + ","
 }
 // Round to 3 dec places, and multiply by gain for attenuated inputs
@@ -25,6 +25,13 @@ function resetReadings () {
     Vreadings1 = []
     Vreadings2 = []
     Vreadings3 = []
+}
+function leadingZero (num: number) {
+    if (num < 10) {
+        return "0" + num
+    } else {
+        return convertToText(num)
+    }
 }
 function _2decPlaces (num: number, places: number) {
     a = 10 ** places
@@ -85,9 +92,21 @@ function setTime (text: string) {
     0
     )
 }
-// My TEMPORARY upload - no dateTime yet!
-input.onButtonPressed(Button.B, function () {
-    upload()
+radio.onReceivedString(function (receivedString) {
+    stringIn = receivedString
+    command = stringIn.substr(0, 2)
+    if (command.compare("rt") == 0) {
+        readTime()
+        radio.sendString(dateTime)
+    } else if (command.compare("st") == 0) {
+        setTime(stringIn)
+    } else if (command.compare("sd") == 0) {
+        setDate(stringIn)
+    } else if (command.compare("up") == 0) {
+        upload()
+    } else if (command.compare("xx") == 0) {
+        resetReadings()
+    }
 })
 let params = ""
 let b = 0
@@ -107,8 +126,10 @@ let date = ""
 let gain = 0
 let count = 0
 let Nloops = 0
-let stringIn = ""
 let command = ""
+let stringIn = ""
+stringIn = ""
+command = ""
 let oneMinute = 60000
 Nloops = 50
 count = 0
