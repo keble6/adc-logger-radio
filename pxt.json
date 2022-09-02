@@ -5,7 +5,7 @@
         "core": "*",
         "radio": "*",
         "microphone": "*",
-        "pxt-ADS1115": "github:keble6/pxt-ADS1115#3c120be096a390b1d423cf1e30c0f860b20d9c45",
+        "pxt-ADS1115": "github:keble6/pxt-ads1115#65b221c26b44d68c7494088ef44ba482a8299214",
         "pxt-DS3231": "github:keble6/pxt-ds3231#v1.0.2"
     },
     "files": [
