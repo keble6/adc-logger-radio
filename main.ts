@@ -5,10 +5,10 @@ function readTime () {
 }
 // Round to 3 dec places, and multiply by gain for attenuated inputs
 function makeReading () {
-    ADC0 = "" + _2decPlaces(ADS1115.readADC(0, 10) / scale0, 3) + ","
-    ADC1 = "" + _2decPlaces(ADS1115.readADC(1, 10) / scale1, 3) + ","
-    ADC2 = "" + _2decPlaces(ADS1115.readADC(2, 10) / scale2, 3) + ","
-    ADC3 = convertToText(_2decPlaces(ADS1115.readADC(3, 10), 3))
+    ADC0 = "" + _2decPlaces(ADS1115.readADC(0, ADCdelay) / scale0, 3) + ","
+    ADC1 = "" + _2decPlaces(ADS1115.readADC(1, ADCdelay) / scale1, 3) + ","
+    ADC2 = "" + _2decPlaces(ADS1115.readADC(2, ADCdelay) / scale2, 3) + ","
+    ADC3 = convertToText(_2decPlaces(ADS1115.readADC(3, ADCdelay), 3))
 }
 function resetReadings () {
     count = 0
@@ -121,6 +121,7 @@ let scale2 = 0
 let scale1 = 0
 let scale0 = 0
 let sendDelay = 0
+let ADCdelay = 0
 let count = 0
 let command = ""
 let stringIn = ""
@@ -129,6 +130,8 @@ command = ""
 let oneMinute = 60000
 count = 0
 let gain = 3
+// ADC delay (ms) between config setting and read
+ADCdelay = 138
 // Delay between sending Radio messages
 sendDelay = 500
 // Accurate scaling for attenuators
