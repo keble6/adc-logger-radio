@@ -6,8 +6,8 @@ function readTime () {
 // Round to 3 dec places, and multiply by gain for attenuated inputs
 function makeReading () {
     ADC0 = convertToText(_2decPlaces(ADS1115.readADC(0) / scale0, 3))
-    ADC1 = convertToText(_2decPlaces(ADS1115.readADC(1) / scale0, 3))
-    ADC2 = convertToText(_2decPlaces(ADS1115.readADC(2) / scale0, 3))
+    ADC1 = convertToText(_2decPlaces(ADS1115.readADC(1) / scale1, 3))
+    ADC2 = convertToText(_2decPlaces(ADS1115.readADC(2) / scale2, 3))
     ADC3 = convertToText(_2decPlaces(ADS1115.readADC(3), 3))
 }
 function resetReadings () {
@@ -59,6 +59,7 @@ function setDate (text: string) {
     )
 }
 function upload () {
+    serial.writeValue("count", count)
     if (count > 0) {
         for (let index5 = 0; index5 <= count - 1; index5++) {
             radio.sendString("" + dateTimeReadings[index5] + ",")
@@ -90,6 +91,7 @@ radio.onReceivedString(function (receivedString) {
     stringIn = receivedString
     command = stringIn.substr(0, 2)
     if (command.compare("rt") == 0) {
+        serial.writeLine("#readtime")
         readTime()
         radio.sendString(dateTime)
     } else if (command.compare("st") == 0) {
@@ -97,6 +99,7 @@ radio.onReceivedString(function (receivedString) {
     } else if (command.compare("sd") == 0) {
         setDate(stringIn)
     } else if (command.compare("up") == 0) {
+        serial.writeLine("#upload")
         upload()
     } else if (command.compare("xx") == 0) {
         resetReadings()
@@ -117,6 +120,8 @@ let ADC0 = ""
 let dateTime = ""
 let time = ""
 let date = ""
+let scale2 = 0
+let scale1 = 0
 let scale0 = 0
 let sendDelay = 0
 let count = 0
@@ -132,9 +137,9 @@ sendDelay = 500
 // Accurate scaling for attenuators
 scale0 = 0.3339
 // Accurate scaling for attenuators
-let scale1 = 0.3301
+scale1 = 0.3301
 // Accurate scaling for attenuators
-let scale2 = 0.3297
+scale2 = 0.3297
 ADS1115.setADDR(72)
 ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
