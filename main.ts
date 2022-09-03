@@ -1,14 +1,14 @@
 function readTime () {
     date = "" + leadingZero(DS3231.date()) + "/" + leadingZero(DS3231.month()) + "/" + DS3231.year()
     time = "" + leadingZero(DS3231.hour()) + ":" + leadingZero(DS3231.minute())
-    dateTime = "" + date + " " + time + ","
+    dateTime = "" + date + " " + time
 }
 // Round to 3 dec places, and multiply by gain for attenuated inputs
 function makeReading () {
-    ADC0 = "" + _2decPlaces(ADS1115.readADC(0, ADCdelay) / scale0, 3) + ","
-    ADC1 = "" + _2decPlaces(ADS1115.readADC(1, ADCdelay) / scale1, 3) + ","
-    ADC2 = "" + _2decPlaces(ADS1115.readADC(2, ADCdelay) / scale2, 3) + ","
-    ADC3 = convertToText(_2decPlaces(ADS1115.readADC(3, ADCdelay), 3))
+    ADC0 = convertToText(_2decPlaces(ADS1115.readADC(0) / scale0, 3))
+    ADC1 = convertToText(_2decPlaces(ADS1115.readADC(1) / scale0, 3))
+    ADC2 = convertToText(_2decPlaces(ADS1115.readADC(2) / scale0, 3))
+    ADC3 = convertToText(_2decPlaces(ADS1115.readADC(3), 3))
 }
 function resetReadings () {
     count = 0
@@ -61,13 +61,13 @@ function setDate (text: string) {
 function upload () {
     if (count > 0) {
         for (let index5 = 0; index5 <= count - 1; index5++) {
-            radio.sendString("" + (dateTimeReadings[index5]))
+            radio.sendString("" + dateTimeReadings[index5] + ",")
             basic.pause(sendDelay)
-            radio.sendString("" + (Vreadings0[index5]))
+            radio.sendString("" + Vreadings0[index5] + ",")
             basic.pause(sendDelay)
-            radio.sendString("" + (Vreadings1[index5]))
+            radio.sendString("" + Vreadings1[index5] + ",")
             basic.pause(sendDelay)
-            radio.sendString("" + (Vreadings2[index5]))
+            radio.sendString("" + Vreadings2[index5] + ",")
             basic.pause(sendDelay)
             radio.sendString("" + (Vreadings3[index5]))
             basic.pause(sendDelay)
@@ -117,11 +117,8 @@ let ADC0 = ""
 let dateTime = ""
 let time = ""
 let date = ""
-let scale2 = 0
-let scale1 = 0
 let scale0 = 0
 let sendDelay = 0
-let ADCdelay = 0
 let count = 0
 let command = ""
 let stringIn = ""
@@ -130,16 +127,14 @@ command = ""
 let oneMinute = 60000
 count = 0
 let gain = 3
-// ADC delay (ms) between config setting and read
-ADCdelay = 138
 // Delay between sending Radio messages
 sendDelay = 500
 // Accurate scaling for attenuators
 scale0 = 0.3339
 // Accurate scaling for attenuators
-scale1 = 0.3301
+let scale1 = 0.3301
 // Accurate scaling for attenuators
-scale2 = 0.3297
+let scale2 = 0.3297
 ADS1115.setADDR(72)
 ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
