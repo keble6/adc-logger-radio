@@ -46,6 +46,12 @@ input.onButtonPressed(Button.A, function () {
     radio.sendString(ADC3)
     basic.pause(sendDelay)
 })
+function sendRadioWithAck (text: string) {
+    while (!(ack)) {
+        serial.writeLine("#waiting for ack")
+    }
+    radio.sendString(text)
+}
 function setDate (text: string) {
     params = text.substr(2, text.length - 2)
     DS3231.dateTime(
@@ -62,16 +68,11 @@ function upload () {
     serial.writeValue("count", count)
     if (count > 0) {
         for (let index5 = 0; index5 <= count - 1; index5++) {
-            radio.sendString("" + dateTimeReadings[index5] + ",")
-            basic.pause(sendDelay)
-            radio.sendString("" + Vreadings0[index5] + ",")
-            basic.pause(sendDelay)
-            radio.sendString("" + Vreadings1[index5] + ",")
-            basic.pause(sendDelay)
-            radio.sendString("" + Vreadings2[index5] + ",")
-            basic.pause(sendDelay)
-            radio.sendString("" + (Vreadings3[index5]))
-            basic.pause(sendDelay)
+            sendRadioWithAck("" + dateTimeReadings[index5] + ",")
+            sendRadioWithAck("" + Vreadings0[index5] + ",")
+            sendRadioWithAck("" + Vreadings1[index5] + ",")
+            sendRadioWithAck("" + Vreadings2[index5] + ",")
+            sendRadioWithAck(Vreadings3[index5])
         }
     }
 }
@@ -103,6 +104,8 @@ radio.onReceivedString(function (receivedString) {
         upload()
     } else if (command.compare("xx") == 0) {
         resetReadings()
+    } else if (command.compare("ak") == 0) {
+        ack = true
     }
 })
 let params = ""
@@ -127,6 +130,9 @@ let sendDelay = 0
 let count = 0
 let command = ""
 let stringIn = ""
+let ack = false
+// only upload a string to radio if ack is true
+ack = true
 stringIn = ""
 command = ""
 let oneMinute = 60000
@@ -147,7 +153,7 @@ resetReadings()
 makeReading()
 // TODO - add multi-minute loop
 loops.everyInterval(oneMinute, function () {
-    if (DS3231.minute() % 30 == 0) {
+    if (DS3231.minute() % 5 == 0) {
         readTime()
         dateTimeReadings.push(dateTime)
         makeReading()
