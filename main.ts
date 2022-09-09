@@ -47,12 +47,19 @@ input.onButtonPressed(Button.A, function () {
     basic.pause(sendDelay)
 })
 function sendRadioWithAck (text: string) {
-    while (!(ack)) {
-        basic.pause(1)
+    for (let index = 0; index < Nresends; index++) {
+        // Send then wait for ack 
+        radio.sendString(text)
+        // Allow 500 ms for ACK
+        for (let index = 0; index < 50; index++) {
+            basic.pause(10)
+            if (ack) {
+                ack = false
+                return true
+            }
+        }
     }
-    ack = false
-    // Send then wait for ack before sending next
-    radio.sendString(text)
+    return false
 }
 function setDate (text: string) {
     params = text.substr(2, text.length - 2)
@@ -136,9 +143,12 @@ let sendDelay = 0
 let count = 0
 let command = ""
 let stringIn = ""
+let Nresends = 0
 let ack = false
 // only upload a string to radio if ack is true
-ack = true
+ack = false
+// number of radio message resends to try
+Nresends = 10
 stringIn = ""
 command = ""
 let oneMinute = 60000
