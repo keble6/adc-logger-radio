@@ -48,10 +48,11 @@ input.onButtonPressed(Button.A, function () {
 })
 function sendRadioWithAck (text: string) {
     while (!(ack)) {
-        serial.writeLine("#waiting for ack")
+        basic.pause(1)
     }
-    radio.sendString(text)
     ack = false
+    // Send then wait for ack before sending next
+    radio.sendString(text)
 }
 function setDate (text: string) {
     params = text.substr(2, text.length - 2)
@@ -70,8 +71,11 @@ function upload () {
     if (count > 0) {
         for (let index5 = 0; index5 <= count - 1; index5++) {
             sendRadioWithAck("" + dateTimeReadings[index5] + ",")
+            serial.writeLine("#sent upload message 1")
             sendRadioWithAck("" + Vreadings0[index5] + ",")
+            serial.writeLine("#sent upload message 2")
             sendRadioWithAck("" + Vreadings1[index5] + ",")
+            serial.writeLine("#sent upload message 3")
             sendRadioWithAck("" + Vreadings2[index5] + ",")
             sendRadioWithAck(Vreadings3[index5])
         }
@@ -107,6 +111,7 @@ radio.onReceivedString(function (receivedString) {
         resetReadings()
     } else if (command.compare("ak") == 0) {
         ack = true
+        serial.writeLine("#got ack from terminal")
     }
 })
 let params = ""
