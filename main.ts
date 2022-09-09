@@ -51,6 +51,7 @@ function sendRadioWithAck (text: string) {
         serial.writeLine("#waiting for ack")
     }
     radio.sendString(text)
+    ack = false
 }
 function setDate (text: string) {
     params = text.substr(2, text.length - 2)
