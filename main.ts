@@ -5,7 +5,7 @@ function readTime () {
 }
 // Round to 3 dec places, and multiply by gain for attenuated inputs
 function makeReading () {
-    ADCstring = "" + Math.round(ADS1115.readADC(0) / ADC2V / scale0 * 1000) + "," + Math.round(ADS1115.readADC(1) / ADC2V / scale1 * 1000) + "," + Math.round(ADS1115.readADC(2) / ADC2V / scale2 * 1000) + "," + Math.round(ADS1115.readADC(3) / ADC2V * 1000)
+    ADCstring = "" + Math.round(ADS1115.readADC(0) / scale0 * 1000) + "," + Math.round(ADS1115.readADC(1) / scale1 * 1000) + "," + Math.round(ADS1115.readADC(2) / scale2 * 1000) + "," + Math.round(ADS1115.readADC(3) * 1000)
 }
 function resetReadings () {
     count = 0
@@ -27,10 +27,7 @@ function _2decPlaces (num: number, places: number) {
 // Instant Reading
 input.onButtonPressed(Button.A, function () {
     makeReading()
-    serial.writeNumber(ADS1115.readADC(1))
-    serial.writeLine("")
-    serial.writeNumber(ADS1115.readADC(2))
-    serial.writeLine("")
+    serial.writeLine(ADCstring)
 })
 function sendRadioWithAck (text: string) {
     for (let index = 0; index < Nresends; index++) {
@@ -115,7 +112,6 @@ let date = ""
 let scale2 = 0
 let scale1 = 0
 let scale0 = 0
-let ADC2V = 0
 let count = 0
 let command = ""
 let stringIn = ""
@@ -133,7 +129,7 @@ let gain = 3
 // Delay between sending Radio messages
 let sendDelay = 500
 // convert ADC reading to Volts by dividing by this
-ADC2V = 8000
+let ADC2V = 8000
 // Accurate scaling for attenuators
 scale0 = 0.3339
 // Accurate scaling for attenuators
