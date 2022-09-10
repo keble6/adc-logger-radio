@@ -1,22 +1,16 @@
 function readTime () {
     date = "" + leadingZero(DS3231.date()) + "/" + leadingZero(DS3231.month()) + "/" + DS3231.year()
     time = "" + leadingZero(DS3231.hour()) + ":" + leadingZero(DS3231.minute())
-    dateTime = "" + date + " " + time
+    dateTimeString = "" + date + " " + time
 }
 // Round to 3 dec places, and multiply by gain for attenuated inputs
 function makeReading () {
-    ADC0 = convertToText(_2decPlaces(ADS1115.readADC(0) / scale0, 3))
-    ADC1 = convertToText(_2decPlaces(ADS1115.readADC(1) / scale1, 3))
-    ADC2 = convertToText(_2decPlaces(ADS1115.readADC(2) / scale2, 3))
-    ADC3 = convertToText(_2decPlaces(ADS1115.readADC(3), 3))
+    ADCstring = "" + Math.round(ADS1115.readADC(0) * 1000) + "," + Math.round(ADS1115.readADC(1) * 1000) + "," + Math.round(ADS1115.readADC(2) * 1000) + "," + Math.round(ADS1115.readADC(3) * 1000)
 }
 function resetReadings () {
     count = 0
     dateTimeReadings = []
-    Vreadings0 = []
-    Vreadings1 = []
-    Vreadings2 = []
-    Vreadings3 = []
+    Vreadings = []
 }
 function leadingZero (num: number) {
     if (num < 10) {
@@ -32,15 +26,15 @@ function _2decPlaces (num: number, places: number) {
 }
 // Instant Reading
 input.onButtonPressed(Button.A, function () {
+    let ADC3 = 0
+    let ADC2 = 0
+    let ADC1 = 0
+    let ADC0 = 0
     makeReading()
-    serial.writeLine(ADC0)
-    serial.writeLine(ADC1)
-    serial.writeLine(ADC2)
-    serial.writeLine(ADC3)
-    sendRadioWithAck(ADC0)
-    sendRadioWithAck(ADC1)
-    sendRadioWithAck(ADC2)
-    sendRadioWithAck(ADC3)
+    serial.writeLine("" + (ADC0))
+    serial.writeLine("" + (ADC1))
+    serial.writeLine("" + (ADC2))
+    serial.writeLine("" + (ADC3))
 })
 function sendRadioWithAck (text: string) {
     for (let index = 0; index < Nresends; index++) {
@@ -74,7 +68,10 @@ function upload () {
     serial.writeValue("count", count)
     if (count > 0) {
         for (let index5 = 0; index5 <= count - 1; index5++) {
-            sendRadioWithAck("" + dateTimeReadings[index5] + "")
+            radio.sendString("" + dateTimeReadings[index5] + ",")
+            basic.pause(100)
+            radio.sendString("" + (Vreadings[index5]))
+            basic.pause(100)
         }
     }
 }
@@ -96,7 +93,7 @@ radio.onReceivedString(function (receivedString) {
     if (command.compare("rt") == 0) {
         serial.writeLine("#readtime")
         readTime()
-        radio.sendString(dateTime)
+        radio.sendString(dateTimeString)
     } else if (command.compare("st") == 0) {
         setTime(stringIn)
     } else if (command.compare("sd") == 0) {
@@ -113,21 +110,12 @@ radio.onReceivedString(function (receivedString) {
 let params = ""
 let b = 0
 let a = 0
-let Vreadings3: string[] = []
-let Vreadings2: string[] = []
-let Vreadings1: string[] = []
-let Vreadings0: string[] = []
+let Vreadings: string[] = []
 let dateTimeReadings: string[] = []
-let ADC3 = ""
-let ADC2 = ""
-let ADC1 = ""
-let ADC0 = ""
-let dateTime = ""
+let ADCstring = ""
+let dateTimeString = ""
 let time = ""
 let date = ""
-let scale2 = 0
-let scale1 = 0
-let scale0 = 0
 let count = 0
 let command = ""
 let stringIn = ""
@@ -145,11 +133,11 @@ let gain = 3
 // Delay between sending Radio messages
 let sendDelay = 500
 // Accurate scaling for attenuators
-scale0 = 0.3339
+let scale0 = 0.3339
 // Accurate scaling for attenuators
-scale1 = 0.3301
+let scale1 = 0.3301
 // Accurate scaling for attenuators
-scale2 = 0.3297
+let scale2 = 0.3297
 ADS1115.setADDR(72)
 ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
@@ -159,12 +147,9 @@ makeReading()
 loops.everyInterval(oneMinute, function () {
     if (DS3231.minute() % 1 == 0) {
         readTime()
-        dateTimeReadings.push(dateTime)
+        dateTimeReadings.push(dateTimeString)
         makeReading()
-        Vreadings0.push(ADC0)
-        Vreadings1.push(ADC1)
-        Vreadings2.push(ADC2)
-        Vreadings3.push(ADC3)
+        Vreadings.push(ADCstring)
         count += 1
     }
     led.plot(4, 0)
