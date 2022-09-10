@@ -37,14 +37,10 @@ input.onButtonPressed(Button.A, function () {
     serial.writeLine(ADC1)
     serial.writeLine(ADC2)
     serial.writeLine(ADC3)
-    radio.sendString(ADC0)
-    basic.pause(sendDelay)
-    radio.sendString(ADC1)
-    basic.pause(sendDelay)
-    radio.sendString(ADC2)
-    basic.pause(sendDelay)
-    radio.sendString(ADC3)
-    basic.pause(sendDelay)
+    sendRadioWithAck(ADC0)
+    sendRadioWithAck(ADC1)
+    sendRadioWithAck(ADC2)
+    sendRadioWithAck(ADC3)
 })
 function sendRadioWithAck (text: string) {
     for (let index = 0; index < Nresends; index++) {
@@ -59,6 +55,7 @@ function sendRadioWithAck (text: string) {
             }
         }
     }
+    serial.writeLine("No ACK detected!")
     return false
 }
 function setDate (text: string) {
@@ -77,14 +74,7 @@ function upload () {
     serial.writeValue("count", count)
     if (count > 0) {
         for (let index5 = 0; index5 <= count - 1; index5++) {
-            sendRadioWithAck("" + dateTimeReadings[index5] + ",")
-            serial.writeLine("#sent upload message 1")
-            sendRadioWithAck("" + Vreadings0[index5] + ",")
-            serial.writeLine("#sent upload message 2")
-            sendRadioWithAck("" + Vreadings1[index5] + ",")
-            serial.writeLine("#sent upload message 3")
-            sendRadioWithAck("" + Vreadings2[index5] + ",")
-            sendRadioWithAck(Vreadings3[index5])
+            sendRadioWithAck("" + dateTimeReadings[index5] + "")
         }
     }
 }
@@ -118,7 +108,6 @@ radio.onReceivedString(function (receivedString) {
         resetReadings()
     } else if (command.compare("ak") == 0) {
         ack = true
-        serial.writeLine("#got ack from terminal")
     }
 })
 let params = ""
@@ -139,7 +128,6 @@ let date = ""
 let scale2 = 0
 let scale1 = 0
 let scale0 = 0
-let sendDelay = 0
 let count = 0
 let command = ""
 let stringIn = ""
@@ -155,7 +143,7 @@ let oneMinute = 60000
 count = 0
 let gain = 3
 // Delay between sending Radio messages
-sendDelay = 500
+let sendDelay = 500
 // Accurate scaling for attenuators
 scale0 = 0.3339
 // Accurate scaling for attenuators
@@ -169,7 +157,7 @@ resetReadings()
 makeReading()
 // TODO - add multi-minute loop
 loops.everyInterval(oneMinute, function () {
-    if (DS3231.minute() % 5 == 0) {
+    if (DS3231.minute() % 1 == 0) {
         readTime()
         dateTimeReadings.push(dateTime)
         makeReading()
