@@ -64,6 +64,7 @@ function upload () {
             radio.sendString("" + dateTimeReadings[index5] + ",")
             basic.pause(100)
             radio.sendString("" + (Vreadings[index5]))
+            serial.writeLine("" + (Vreadings[index5]))
             basic.pause(100)
         }
     }
