@@ -5,7 +5,10 @@ function readTime () {
 }
 // Round to 3 dec places, and multiply by gain for attenuated inputs
 function makeReading () {
-    ADCstring = "" + Math.round(ADS1115.readADC(0) / scale0 * 1000) + "," + Math.round(ADS1115.readADC(1) / scale1 * 1000) + "," + Math.round(ADS1115.readADC(2) / scale2 * 1000) + "," + Math.round(ADS1115.readADC(3) * 1000)
+    V0 = _2decPlaces(ADS1115.readADC(0) / scale0, 3)
+    V1 = _2decPlaces(ADS1115.readADC(1) / scale1, 3)
+    V2 = _2decPlaces(ADS1115.readADC(2) / scale2, 3)
+    V3 = _2decPlaces(ADS1115.readADC(3), 3)
 }
 function resetReadings () {
     count = 0
@@ -27,7 +30,10 @@ function _2decPlaces (num: number, places: number) {
 // Instant Reading
 input.onButtonPressed(Button.A, function () {
     makeReading()
-    serial.writeLine(ADCstring)
+    serial.writeValue("V0", V0)
+    serial.writeValue("V1", V1)
+    serial.writeValue("V2", V2)
+    serial.writeValue("V3", V3)
 })
 function sendRadioWithAck (text: string) {
     for (let index = 0; index < Nresends; index++) {
@@ -63,8 +69,14 @@ function upload () {
         for (let index5 = 0; index5 <= count - 1; index5++) {
             radio.sendString("" + dateTimeReadings[index5] + ",")
             basic.pause(100)
-            radio.sendString("" + (Vreadings[index5]))
-            serial.writeLine("" + (Vreadings[index5]))
+            radio.sendValue("V0", V0)
+            radio.sendValue("V1", V1)
+            radio.sendValue("V2", V2)
+            radio.sendValue("V3", V3)
+            serial.writeValue("V0", V0)
+            serial.writeValue("V1", V1)
+            serial.writeValue("V2", V2)
+            serial.writeValue("V3", V3)
             basic.pause(100)
         }
     }
@@ -104,9 +116,12 @@ radio.onReceivedString(function (receivedString) {
 let params = ""
 let b = 0
 let a = 0
-let Vreadings: string[] = []
+let Vreadings: number[] = []
 let dateTimeReadings: string[] = []
-let ADCstring = ""
+let V3 = 0
+let V2 = 0
+let V1 = 0
+let V0 = 0
 let dateTimeString = ""
 let time = ""
 let date = ""
@@ -142,14 +157,21 @@ ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
 resetReadings()
 makeReading()
+let Vreadings0: number[] = []
+let Vreadings1: number[] = []
+let Vreadings2: number[] = []
+let Vreadings3: number[] = []
 // TODO - add multi-minute loop
 loops.everyInterval(oneMinute, function () {
-    if (DS3231.minute() % 1 == 0) {
+    if (DS3231.minute() % 5 == 0) {
         readTime()
         dateTimeReadings.push(dateTimeString)
         makeReading()
-        Vreadings.push(ADCstring)
         count += 1
+        Vreadings0.push(V0)
+        Vreadings1.push(V1)
+        Vreadings2.push(V2)
+        Vreadings3.push(V3)
     }
     led.plot(4, 0)
     basic.pause(50)
