@@ -99,7 +99,7 @@ radio.onReceivedString(function (receivedString) {
     if (command.compare("rt") == 0) {
         serial.writeLine("#readtime")
         readTime()
-        radio.sendString("rt = " + dateTimeString)
+        radio.sendString("r" + dateTimeString)
     } else if (command.compare("st") == 0) {
         setTime(stringIn)
     } else if (command.compare("sd") == 0) {
