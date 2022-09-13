@@ -55,11 +55,15 @@ function upload () {
     if (count > 0) {
         for (let index5 = 0; index5 <= count - 1; index5++) {
             radio.sendString("" + dateTimeReadings[index5] + ",")
-            basic.pause(100)
+            basic.pause(sendDelay)
             radio.sendValue("V0", V0)
+            basic.pause(sendDelay)
             radio.sendValue("V1", V1)
+            basic.pause(sendDelay)
             radio.sendValue("V2", V2)
+            basic.pause(sendDelay)
             radio.sendValue("V3", V3)
+            basic.pause(sendDelay)
             serial.writeValue("V0", V0)
             serial.writeValue("V1", V1)
             serial.writeValue("V2", V2)
@@ -115,6 +119,7 @@ let V0 = 0
 let dateTimeString = ""
 let time = ""
 let date = ""
+let sendDelay = 0
 let scale2 = 0
 let scale1 = 0
 let scale0 = 0
@@ -135,6 +140,8 @@ scale0 = 0.3339
 scale1 = 0.3301
 // Accurate scaling for attenuators
 scale2 = 0.3297
+// Delay after sending Radio mesg, to allow handling by receiver and terminal
+sendDelay = 100
 ADS1115.setADDR(72)
 ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
@@ -142,7 +149,7 @@ resetReadings()
 makeReading()
 // TODO - add multi-minute loop
 loops.everyInterval(oneMinute, function () {
-    if (DS3231.minute() % 5 == 0) {
+    if (DS3231.minute() % 30 == 0) {
         readTime()
         dateTimeReadings.push(dateTimeString)
         makeReading()
