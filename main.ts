@@ -13,7 +13,10 @@ function makeReading () {
 function resetReadings () {
     count = 0
     dateTimeReadings = []
-    Vreadings = []
+    Vreadings0 = []
+    Vreadings1 = []
+    Vreadings2 = []
+    Vreadings3 = []
 }
 function leadingZero (num: number) {
     if (num < 10) {
@@ -35,22 +38,6 @@ input.onButtonPressed(Button.A, function () {
     serial.writeValue("V2", V2)
     serial.writeValue("V3", V3)
 })
-function sendRadioWithAck (text: string) {
-    for (let index = 0; index < Nresends; index++) {
-        // Send then wait for ack 
-        radio.sendString(text)
-        // Allow 500 ms for ACK
-        for (let index = 0; index < 50; index++) {
-            basic.pause(10)
-            if (ack) {
-                ack = false
-                return true
-            }
-        }
-    }
-    serial.writeLine("No ACK detected!")
-    return false
-}
 function setDate (text: string) {
     params = text.substr(2, text.length - 2)
     DS3231.dateTime(
@@ -116,7 +103,10 @@ radio.onReceivedString(function (receivedString) {
 let params = ""
 let b = 0
 let a = 0
-let Vreadings: number[] = []
+let Vreadings3: number[] = []
+let Vreadings2: number[] = []
+let Vreadings1: number[] = []
+let Vreadings0: number[] = []
 let dateTimeReadings: string[] = []
 let V3 = 0
 let V2 = 0
@@ -131,21 +121,14 @@ let scale0 = 0
 let count = 0
 let command = ""
 let stringIn = ""
-let Nresends = 0
 let ack = false
 // only upload a string to radio if ack is true
 ack = false
-// number of radio message resends to try
-Nresends = 10
 stringIn = ""
 command = ""
 let oneMinute = 60000
 count = 0
 let gain = 3
-// Delay between sending Radio messages
-let sendDelay = 500
-// convert ADC reading to Volts by dividing by this
-let ADC2V = 8000
 // Accurate scaling for attenuators
 scale0 = 0.3339
 // Accurate scaling for attenuators
@@ -157,10 +140,6 @@ ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
 resetReadings()
 makeReading()
-let Vreadings0: number[] = []
-let Vreadings1: number[] = []
-let Vreadings2: number[] = []
-let Vreadings3: number[] = []
 // TODO - add multi-minute loop
 loops.everyInterval(oneMinute, function () {
     if (DS3231.minute() % 5 == 0) {
