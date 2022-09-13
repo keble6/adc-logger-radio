@@ -56,19 +56,14 @@ function upload () {
         for (let index5 = 0; index5 <= count - 1; index5++) {
             radio.sendString("" + dateTimeReadings[index5] + ",")
             basic.pause(sendDelay)
-            radio.sendValue("V0", V0)
+            radio.sendValue("V0", Vreadings0[index5])
             basic.pause(sendDelay)
-            radio.sendValue("V1", V1)
+            radio.sendValue("V1", Vreadings1[index5])
             basic.pause(sendDelay)
-            radio.sendValue("V2", V2)
+            radio.sendValue("V2", Vreadings2[index5])
             basic.pause(sendDelay)
-            radio.sendValue("V3", V3)
+            radio.sendValue("V3", Vreadings3[index5])
             basic.pause(sendDelay)
-            serial.writeValue("V0", V0)
-            serial.writeValue("V1", V1)
-            serial.writeValue("V2", V2)
-            serial.writeValue("V3", V3)
-            basic.pause(100)
         }
     }
 }
