@@ -129,14 +129,14 @@ command = ""
 let oneMinute = 60000
 count = 0
 let gain = 3
-// Accurate scaling for attenuators
-scale0 = 0.3339
-// Accurate scaling for attenuators
-scale1 = 0.3301
-// Accurate scaling for attenuators
-scale2 = 0.3297
+// Accurate scaling from TP1 ro A0
+scale0 = 0.3343
+// Accurate scaling from TP2 to A1
+scale1 = 0.3337
+// Accurate scaling from TP3 to A2
+scale2 = 0.3353
 // Delay after sending Radio mesg, to allow handling by receiver and terminal
-sendDelay = 100
+sendDelay = 1000
 ADS1115.setADDR(72)
 ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
@@ -144,7 +144,7 @@ resetReadings()
 makeReading()
 // TODO - add multi-minute loop
 loops.everyInterval(oneMinute, function () {
-    if (DS3231.minute() % 30 == 0) {
+    if (DS3231.minute() % 15 == 0) {
         readTime()
         dateTimeReadings.push(dateTimeString)
         makeReading()
