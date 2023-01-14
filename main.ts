@@ -136,7 +136,7 @@ scale1 = 0.3337
 // Accurate scaling from TP3 to A2
 scale2 = 0.3353
 // Delay after sending Radio mesg, to allow handling by receiver and terminal
-sendDelay = 1000
+sendDelay = 500
 ADS1115.setADDR(72)
 ADS1115.setFSR(FSR.V4)
 radio.setGroup(1)
